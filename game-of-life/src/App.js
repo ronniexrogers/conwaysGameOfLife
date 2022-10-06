@@ -5,14 +5,18 @@ import './App.css';
 function App() {
 
 const [grid, setGrid] = useState(null)
-const [running, setRunning] = useState(false)
 const [start, setStart] = useState(false)
+const [intervalID, setintervalID] = useState(null)
+const [numRows, setNumRows] = useState(20)
+const [numColumns, setNumColumns] = useState(20)
+const [gridSize, setGridSize] = useState(0)
+const [color, setColor] = useState('grey')
+const [cell, setCell] = useState(0)
+
+
 const startRef = useRef(start)
 startRef.current = start
 
-// Variables to determine size of my grid based on number of rows and columns
-const numRows = 30
-const numColumns = 30
 
 // Neighbors variable determines x & y coordinates of each cells neighbors
 const neighborPositions = [
@@ -46,7 +50,6 @@ const generateRandomGrid = (rows, cols) => {
 }
 
 // Function to run the simulation logic
-
 const runSimulation = () => {
   if (!startRef.current) {
     return
@@ -79,40 +82,58 @@ const runSimulation = () => {
     return mutatedGrid
 })}
 
-
 useEffect(() => {
   generateBlankGrid(numRows, numColumns)
 }, [])
 
-
 if(!grid) return <div>loading...</div>
 
   return (
-    <div className="App">
-      <button onClick={() => generateRandomGrid(numRows, numColumns)}>Generate Random Grid</button>
-      <button onClick={() => generateBlankGrid(numRows, numColumns)}>Generate Blank Grid</button>
-      <button onClick={() => {
+    <div className="app">
+      <h1>Conway's Game of Life</h1>
+      <button 
+      disabled={start}
+      onClick={() => generateRandomGrid(numRows, numColumns)}>Generate Random Grid</button>
+      <button 
+      disabled={start}
+      onClick={() => generateBlankGrid(numRows, numColumns)}>Clear Grid</button>
+      <button 
+      disabled={start}
+      onClick={() => {
       setStart(!start)
             if (!start) {
               startRef.current = true
             }
-      setInterval(() => runSimulation(), 1000)
-        }}>{start ? 'Stop' : 'Start'}</button>
+      setintervalID(setInterval(() => runSimulation(), 600))
+        }}>Start</button>
+      <button 
+      disabled={!start}
+        onClick={() => {
+        clearInterval(intervalID)
+        setStart(!start)
+            if (start) {
+              startRef.current = false
+            }
+        }}>Pause</button>
+
       <div className='grid'
         style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${numColumns}, 20px)`
       }}>
-        {grid.map((rows, i) => rows.map((col, j) => 
+        {grid.map((rows, i) => rows.map((col, j) => {
+        return (
         <div 
         key={`${i}-${j}`}
         style={{
           width: 20,
           height: 20,
           backgroundColor: grid[i][j] === 1 ? "pink" : 'grey',
-          border: 'solid 1px black'
-        }}>  
-        </div>))}
+          border: 'solid .5px black'
+        }}
+        >  
+        </div>
+        )}))}
       </div>
     </div>
   );
